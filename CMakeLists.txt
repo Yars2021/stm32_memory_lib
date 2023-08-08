@@ -86,6 +86,8 @@ set(GROUP_SOURCES_HAL_DRIVER
 		Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_i2c.c
 		Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_adc.c
 		Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.c
+		Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash.c
+		Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash_ex.c
 		)
 
 set(GROUP_SOURCES_UNILIB_INTERFACE

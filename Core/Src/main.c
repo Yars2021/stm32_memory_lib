@@ -8,6 +8,7 @@ int main (void)
 
     while (1)
     {
-
+        WriteToFlash(12567);
+        Flash_ReadParams();
     }
 }
