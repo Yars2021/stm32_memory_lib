@@ -12,12 +12,18 @@ HAL_StatusTypeDef flash_writemem(char* buff, size_t len, size_t addr)
     HAL_FLASHEx_Erase(&ef, &temp); // Вызов функции стирания
     for(int i=0; i<len; i+=2){
         stat = HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (uint32_t)(addr + i), (uint16_t)(buff[i] | buff[i+1]<<8));
-        if(stat != HAL_OK) return stat;
+        if(stat != HAL_OK) {
+            HAL_FLASH_Lock();
+            return stat;
+        }
     }
     if(len%2 == 1){
         uint16_t data = buff[len-1]<<8;
         stat = HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (uint32_t)(addr + len-1), (uint16_t)data);
-        if(stat != HAL_OK) return stat;
+        if(stat != HAL_OK) {
+            HAL_FLASH_Lock();
+            return stat;
+        }
     }
     HAL_FLASH_Lock();
     return HAL_OK;
