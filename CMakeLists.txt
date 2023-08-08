@@ -69,6 +69,7 @@ set(GROUP_SOURCES_CORE
 		Core/Src/main.c
 		Core/Src/low_level.c
 		Core/Src/it.c
+		Core/Src/memory.c
 		)
 
 set(GROUP_SOURCES_HAL_DRIVER
