@@ -2,6 +2,10 @@
 
 #include "include.h"
 
+extern uint32_t __fini_array_end;
+
+uint32_t program_end;
+
 int main (void)
 {
     initLowLevel();
@@ -11,8 +15,10 @@ int main (void)
 
     while (1)
     {
-        writemem(Flash_Memory, mem, 11, addr);
-        readmem(Flash_Memory, in, 11, addr);
+        program_end = __fini_array_end;
+
+        writemem(Flash_Memory, addr, mem, 11);
+        readmem(Flash_Memory, addr, in, 11);
         HAL_Delay(100);
     }
 }
