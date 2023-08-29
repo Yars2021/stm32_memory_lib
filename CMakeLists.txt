@@ -69,6 +69,8 @@ set(GROUP_SOURCES_CORE
 		Core/Src/main.c
 		Core/Src/low_level.c
 		Core/Src/it.c
+		Core/Src/flash_mem.c
+		Core/Src/eeprom_mem.c
 		Core/Src/memory.c
 		)
 

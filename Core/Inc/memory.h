@@ -2,7 +2,8 @@
 #define _MEMORY_H_
 
 typedef enum {
-    Flash_Memory = 0    // Flash mem
+    Flash_Memory = 0,    // Flash mem
+    EEPROM_Memory = 1    // EEPROM
 } Device_type;
 
 HAL_StatusTypeDef readmem(Device_type dev_t, size_t addr, char *buff, size_t len);
