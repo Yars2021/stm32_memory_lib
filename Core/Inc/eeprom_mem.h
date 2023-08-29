@@ -3,7 +3,40 @@
 
 #include "include.h"
 
-HAL_StatusTypeDef eeprom_writemem(char* buff, size_t len, size_t addr);
-HAL_StatusTypeDef eeprom_readmem(char* buff, size_t len, size_t addr);
+#define AT24C01_MAX_ADDR    0x007F
+#define AT24C32_MAX_ADDR    0x0FFF
+#define AT24C64_MAX_ADDR    0x1FFF
+#define AT24C128_MAX_ADDR   0x3FFF
+#define AT24C256_MAX_ADDR   0x7FFF
+#define AT24C512_MAX_ADDR   0xFFFF
+
+#define AT24C01_PAGE_SIZE   8
+#define AT24C32_PAGE_SIZE   32
+#define AT24C64_PAGE_SIZE   32
+#define AT24C128_PAGE_SIZE  64
+#define AT24C256_PAGE_SIZE  64
+#define AT24C512_PAGE_SIZE  128
+
+typedef enum {
+    AT24C01  = 0,
+    AT24C32  = 1, 
+    AT24C64  = 2, 
+    AT24C128 = 3, 
+    AT24C256 = 4, 
+    AT24C512 = 5 
+} EEPROM_device_model;
+
+typedef struct {
+    struct {
+        I2C_HandleTypeDef *i2c_handle;
+        uint16_t i2c_dev_addr;
+    } Intreface;
+
+    EEPROM_device_model device_model;
+
+} EEPROM_device_t;
+
+HAL_StatusTypeDef eeprom_writemem(EEPROM_device_t dev, char* buff, size_t len, size_t addr);
+HAL_StatusTypeDef eeprom_readmem(EEPROM_device_t dev, char* buff, size_t len, size_t addr);
 
 #endif /* _EEPROM_MEM_H_ */

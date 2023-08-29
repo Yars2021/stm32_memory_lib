@@ -20,6 +20,7 @@
 #include "low_level.h"
 #include "var.h"
 #include "memory.h"
+#include "eeprom_mem.h"
 
 #define VERSION_MAJOR			1
 #define VERSION_MINOR			0

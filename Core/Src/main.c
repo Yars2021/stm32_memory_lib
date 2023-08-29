@@ -19,8 +19,8 @@ int main (void)
     {
         program_end = __fini_array_end;
 
-        writemem(Flash_Memory, addr, write_mem, 12);
-        readmem(Flash_Memory, addr, read_mem, 11);
+        writemem(Flash_Memory, NULL, addr, write_mem, 12);
+        readmem(Flash_Memory, NULL, addr, read_mem, 11);
         HAL_Delay(100);
     }
 }
