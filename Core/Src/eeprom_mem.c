@@ -63,7 +63,46 @@ HAL_StatusTypeDef eeprom_device_init(EEPROM_device_t *dev, EEPROM_device_model m
 
 HAL_StatusTypeDef eeprom_writemem(EEPROM_device_t *dev, uint8_t* buff, size_t len, size_t addr)
 {
+    uint8_t page_size = eeprom_get_page_size(dev->device_model);
+	uint8_t first_page_remaining = page_size - addr % page_size;
+	uint8_t num_of_pages = (len - first_page_remaining) / page_size;
+	uint8_t last_page_remaining = (len - first_page_remaining) % page_size;
 
+    if ((addr + first_page_remaining) >= eeprom_get_max_addr(dev->device_model)) return HAL_ERROR;
+
+    while (HAL_I2C_Mem_Write(dev->Intreface.i2c_handle,
+                             0xA0 | (dev->Intreface.i2c_dev_addr << 1),
+                             (uint16_t) addr,
+                             I2C_MEMADD_SIZE_16BIT,
+                             buff,
+                             first_page_remaining,
+                             1000) != HAL_OK);
+
+	for (uint8_t current_page = 0; current_page < num_of_pages; current_page++) {
+        if ((addr + first_page_remaining + current_page * page_size) >= eeprom_get_max_addr(dev->device_model)) return HAL_ERROR;
+
+        while (HAL_I2C_Mem_Write(dev->Intreface.i2c_handle,
+                                 0xA0 | (dev->Intreface.i2c_dev_addr << 1),
+                                 (uint16_t) addr + first_page_remaining + current_page * page_size,
+                                 I2C_MEMADD_SIZE_16BIT,
+                                 buff + first_page_remaining + current_page * page_size,
+                                 page_size,
+                                 1000) != HAL_OK);
+	}
+
+	if (last_page_remaining) {
+        if ((addr + first_page_remaining + num_of_pages * page_size) >= eeprom_get_max_addr(dev->device_model)) return HAL_ERROR;
+
+        while (HAL_I2C_Mem_Write(dev->Intreface.i2c_handle,
+                                 0xA0 | (dev->Intreface.i2c_dev_addr << 1),
+                                 (uint16_t) addr + first_page_remaining + num_of_pages * page_size,
+                                 I2C_MEMADD_SIZE_16BIT,
+                                 buff + first_page_remaining + num_of_pages * page_size,
+                                 last_page_remaining,
+                                 1000) != HAL_OK);
+	}
+
+	return HAL_OK;
 }
 
 HAL_StatusTypeDef eeprom_readmem(EEPROM_device_t *dev, uint8_t* buff, size_t len, size_t addr)
