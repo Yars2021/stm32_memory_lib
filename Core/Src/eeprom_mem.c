@@ -1,5 +1,10 @@
 #include "eeprom_mem.h"
 
+size_t min_data_len(size_t a, size_t b) 
+{
+    return a < b ? a : b;
+}
+
 size_t eeprom_get_max_addr(EEPROM_device_model model)
 {
     switch(model) {
@@ -63,10 +68,10 @@ HAL_StatusTypeDef eeprom_device_init(EEPROM_device_t *dev, EEPROM_device_model m
 
 HAL_StatusTypeDef eeprom_writemem(EEPROM_device_t *dev, uint8_t* buff, size_t len, size_t addr)
 {
-    uint8_t page_size = eeprom_get_page_size(dev->device_model);
-	uint8_t first_page_remaining = page_size - addr % page_size;
-	uint8_t num_of_pages = (len - first_page_remaining) / page_size;
-	uint8_t last_page_remaining = (len - first_page_remaining) % page_size;
+    uint8_t page_size = eeprom_get_page_size(dev->device_model);                            // Размер страницы для данной модели устройства
+    uint8_t first_page_remaining = min_data_len(page_size - addr % page_size, len);         // Сколько данных запишем на 1-ю страницу
+	uint8_t num_of_pages = (len - first_page_remaining) / page_size;                        // Количество страниц, на которые будут записаны данные (без учета 1-й и остатка)
+	uint8_t last_page_remaining = (len - first_page_remaining) % page_size;                 // Сколько данных запишем на последнюю страницу (остаток)
 
     if ((addr + first_page_remaining) >= eeprom_get_max_addr(dev->device_model)) return HAL_ERROR;
 
@@ -76,7 +81,7 @@ HAL_StatusTypeDef eeprom_writemem(EEPROM_device_t *dev, uint8_t* buff, size_t le
                              I2C_MEMADD_SIZE_16BIT,
                              buff,
                              first_page_remaining,
-                             1000) != HAL_OK);
+                             1000) != HAL_OK);                                              // Записываем данные на 1-ю страницу
 
 	for (uint8_t current_page = 0; current_page < num_of_pages; current_page++) {
         if ((addr + first_page_remaining + current_page * page_size) >= eeprom_get_max_addr(dev->device_model)) return HAL_ERROR;
@@ -87,7 +92,7 @@ HAL_StatusTypeDef eeprom_writemem(EEPROM_device_t *dev, uint8_t* buff, size_t le
                                  I2C_MEMADD_SIZE_16BIT,
                                  buff + first_page_remaining + current_page * page_size,
                                  page_size,
-                                 1000) != HAL_OK);
+                                 1000) != HAL_OK);                                          // Записываем данные на страницу с номером current_page
 	}
 
 	if (last_page_remaining) {
@@ -99,7 +104,7 @@ HAL_StatusTypeDef eeprom_writemem(EEPROM_device_t *dev, uint8_t* buff, size_t le
                                  I2C_MEMADD_SIZE_16BIT,
                                  buff + first_page_remaining + num_of_pages * page_size,
                                  last_page_remaining,
-                                 1000) != HAL_OK);
+                                 1000) != HAL_OK);                                          // Если остаток есть, записываем его на последнюю страницу
 	}
 
 	return HAL_OK;
