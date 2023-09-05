@@ -36,6 +36,7 @@ typedef struct {
 
 } EEPROM_device_t;
 
+void i2c_pins_init(I2C_HandleTypeDef *i2c_handle);    // ToDo Make universal
 size_t eeprom_get_max_addr(EEPROM_device_model model);
 size_t eeprom_get_page_size(EEPROM_device_model model);
 HAL_StatusTypeDef eeprom_device_init(EEPROM_device_t *dev, EEPROM_device_model model, I2C_HandleTypeDef *i2c_handle, uint16_t i2c_addr);
