@@ -7,19 +7,60 @@ size_t min_data_len(size_t a, size_t b)
 
 void i2c_pins_init(I2C_HandleTypeDef *i2c_handle)
 {
-    GPIO_InitTypeDef GPIO_InitStruct;
+    GPIO_InitTypeDef GPIO_InitStructure = {0};
 
-    if (i2c_handle->Instance == I2C1) {
-        __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_I2C1_CLK_ENABLE();
+    HAL_Delay(100);
+    __HAL_RCC_I2C1_FORCE_RESET();
+    HAL_Delay(100);
+    __HAL_RCC_I2C1_RELEASE_RESET();
+    HAL_Delay(100);
 
-        // PB8 -> SCL | PB9 -> SDA
-        GPIO_InitStruct.Pin = GPIO_PIN_8 | GPIO_PIN_9;
-        GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
-        GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-        HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    CLEAR_BIT(i2c_handle->Instance->CR1, I2C_CR1_PE);
+    HAL_I2C_DeInit(i2c_handle);
 
-        __HAL_AFIO_REMAP_I2C1_ENABLE();
-        __HAL_RCC_I2C1_CLK_ENABLE();
+    GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_OD;
+    GPIO_InitStructure.Pull = GPIO_NOPULL;
+    GPIO_InitStructure.Pin = GPIO_PIN_8 | GPIO_PIN_9; // SCL | SDA
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
+
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET);
+
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
+
+    GPIO_InitStructure.Mode = GPIO_MODE_AF_OD;
+    GPIO_InitStructure.Pin = GPIO_PIN_8 | GPIO_PIN_9;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+    SET_BIT(i2c_handle->Instance->CR1, I2C_CR1_SWRST);
+    asm("nop");
+    CLEAR_BIT(i2c_handle->Instance->CR1, I2C_CR1_SWRST);
+    asm("nop");
+    SET_BIT(i2c_handle->Instance->CR1, I2C_CR1_PE);
+    asm("nop");
+    
+
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+
+    i2c_handle->Instance = I2C1;
+    i2c_handle->Init.ClockSpeed = 100000;
+    i2c_handle->Init.DutyCycle = I2C_DUTYCYCLE_2;
+    i2c_handle->Init.OwnAddress1 = 0;
+    i2c_handle->Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+    i2c_handle->Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+    i2c_handle->Init.OwnAddress2 = 0;
+    i2c_handle->Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+    i2c_handle->Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+    
+    if (HAL_I2C_Init(i2c_handle) != HAL_OK)
+    {
+
     }
 }
 
