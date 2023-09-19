@@ -7,46 +7,19 @@ size_t min_data_len(size_t a, size_t b)
 
 void i2c_pins_init(I2C_HandleTypeDef *i2c_handle)
 {
+    if (!i2c_handle) return;
+
     GPIO_InitTypeDef GPIO_InitStructure = {0};
 
     __HAL_RCC_GPIOB_CLK_ENABLE();
-    __HAL_RCC_I2C1_CLK_ENABLE();
-    HAL_Delay(100);
-    __HAL_RCC_I2C1_FORCE_RESET();
-    HAL_Delay(100);
-    __HAL_RCC_I2C1_RELEASE_RESET();
-    HAL_Delay(100);
 
-    CLEAR_BIT(i2c_handle->Instance->CR1, I2C_CR1_PE);
-    HAL_I2C_DeInit(i2c_handle);
-
-    GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_OD;
-    GPIO_InitStructure.Pull = GPIO_NOPULL;
+    GPIO_InitStructure.Mode = GPIO_MODE_AF_OD;
+    GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
+    GPIO_InitStructure.Pull = GPIO_PULLUP;
     GPIO_InitStructure.Pin = GPIO_PIN_8 | GPIO_PIN_9; // SCL | SDA
     HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
-
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET);
-
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
-
-    GPIO_InitStructure.Mode = GPIO_MODE_AF_OD;
-    GPIO_InitStructure.Pin = GPIO_PIN_8 | GPIO_PIN_9;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-    SET_BIT(i2c_handle->Instance->CR1, I2C_CR1_SWRST);
-    asm("nop");
-    CLEAR_BIT(i2c_handle->Instance->CR1, I2C_CR1_SWRST);
-    asm("nop");
-    SET_BIT(i2c_handle->Instance->CR1, I2C_CR1_PE);
-    asm("nop");
-    
-
-    __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_I2C1_CLK_ENABLE();
 
     i2c_handle->Instance = I2C1;
     i2c_handle->Init.ClockSpeed = 100000;
@@ -125,6 +98,32 @@ HAL_StatusTypeDef eeprom_device_init(EEPROM_device_t *dev, EEPROM_device_model m
     return HAL_OK;
 }
 
+HAL_StatusTypeDef eeprom_write_byte(EEPROM_device_t* dev, uint8_t* buff, size_t addr)
+{
+	if (addr >= eeprom_get_max_addr(dev->device_model)) return HAL_ERROR;
+
+	return HAL_I2C_Mem_Write(dev->Intreface.i2c_handle,
+					         EEPROM_BASE_ADDR_W | (dev->Intreface.i2c_dev_addr << 1),
+					         (uint16_t) addr, 
+                             I2C_MEMADD_SIZE_16BIT, 
+                             buff, 
+                             1,
+					         1000);
+}
+
+HAL_StatusTypeDef eeprom_read_byte(EEPROM_device_t* dev, uint8_t* buff, size_t addr)
+{
+	if (addr >= eeprom_get_max_addr(dev->device_model)) return HAL_ERROR;
+
+	return HAL_I2C_Mem_Read(dev->Intreface.i2c_handle,
+					        EEPROM_BASE_ADDR_R | (dev->Intreface.i2c_dev_addr << 1),
+					        (uint16_t) addr, 
+                            I2C_MEMADD_SIZE_16BIT, 
+                            buff, 
+                            1,
+					        1000);
+}
+
 HAL_StatusTypeDef eeprom_writemem(EEPROM_device_t *dev, uint8_t* buff, size_t len, size_t addr)
 {
     HAL_StatusTypeDef status = HAL_OK;
@@ -137,7 +136,7 @@ HAL_StatusTypeDef eeprom_writemem(EEPROM_device_t *dev, uint8_t* buff, size_t le
     if ((addr + first_page_remaining) >= eeprom_get_max_addr(dev->device_model)) return HAL_ERROR;
 
     status |= HAL_I2C_Mem_Write(dev->Intreface.i2c_handle,
-                                0xA0 | (dev->Intreface.i2c_dev_addr << 1),
+                                dev->Intreface.i2c_dev_addr << 1,
                                 (uint16_t) addr,
                                 I2C_MEMADD_SIZE_16BIT,
                                 buff,
@@ -148,7 +147,7 @@ HAL_StatusTypeDef eeprom_writemem(EEPROM_device_t *dev, uint8_t* buff, size_t le
         if ((addr + first_page_remaining + current_page * page_size) >= eeprom_get_max_addr(dev->device_model)) return HAL_ERROR;
 
         status |= HAL_I2C_Mem_Write(dev->Intreface.i2c_handle,
-                                    0xA0 | (dev->Intreface.i2c_dev_addr << 1),
+                                    dev->Intreface.i2c_dev_addr << 1,
                                     (uint16_t) addr + first_page_remaining + current_page * page_size,
                                     I2C_MEMADD_SIZE_16BIT,
                                     buff + first_page_remaining + current_page * page_size,
@@ -160,7 +159,7 @@ HAL_StatusTypeDef eeprom_writemem(EEPROM_device_t *dev, uint8_t* buff, size_t le
         if ((addr + first_page_remaining + num_of_pages * page_size) >= eeprom_get_max_addr(dev->device_model)) return HAL_ERROR;
 
         status |= HAL_I2C_Mem_Write(dev->Intreface.i2c_handle,
-                                    0xA0 | (dev->Intreface.i2c_dev_addr << 1),
+                                    dev->Intreface.i2c_dev_addr << 1,
                                     (uint16_t) addr + first_page_remaining + num_of_pages * page_size,
                                     I2C_MEMADD_SIZE_16BIT,
                                     buff + first_page_remaining + num_of_pages * page_size,
@@ -178,7 +177,7 @@ HAL_StatusTypeDef eeprom_readmem(EEPROM_device_t *dev, uint8_t* buff, size_t len
     if (addr >= eeprom_get_max_addr(dev->device_model)) return HAL_ERROR;
     
     status = HAL_I2C_Mem_Read(dev->Intreface.i2c_handle, 
-                              0xA1 | (dev->Intreface.i2c_dev_addr << 1), 
+                              dev->Intreface.i2c_dev_addr << 1, 
                               (uint16_t) addr, 
                               I2C_MEMADD_SIZE_16BIT, 
                               buff, 
