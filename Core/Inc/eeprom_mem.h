@@ -33,7 +33,7 @@ typedef struct {
     struct {
         I2C_HandleTypeDef *i2c_handle;
         uint16_t i2c_dev_addr;
-    } Intreface;
+    } Interface;
 
     EEPROM_device_model device_model;
 
