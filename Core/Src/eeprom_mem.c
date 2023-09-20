@@ -5,38 +5,6 @@ size_t min_data_len(size_t a, size_t b)
     return a < b ? a : b;
 }
 
-void i2c_pins_init(I2C_HandleTypeDef *i2c_handle)
-{
-    if (!i2c_handle) return;
-
-    GPIO_InitTypeDef GPIO_InitStructure = {0};
-
-    __HAL_RCC_GPIOB_CLK_ENABLE();
-
-    GPIO_InitStructure.Mode = GPIO_MODE_AF_OD;
-    GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
-    GPIO_InitStructure.Pull = GPIO_PULLUP;
-    GPIO_InitStructure.Pin = GPIO_PIN_8 | GPIO_PIN_9; // SCL | SDA
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-    __HAL_RCC_I2C1_CLK_ENABLE();
-
-    i2c_handle->Instance = I2C1;
-    i2c_handle->Init.ClockSpeed = 100000;
-    i2c_handle->Init.DutyCycle = I2C_DUTYCYCLE_2;
-    i2c_handle->Init.OwnAddress1 = 0;
-    i2c_handle->Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-    i2c_handle->Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-    i2c_handle->Init.OwnAddress2 = 0;
-    i2c_handle->Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-    i2c_handle->Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-    
-    if (HAL_I2C_Init(i2c_handle) != HAL_OK)
-    {
-
-    }
-}
-
 size_t eeprom_get_max_addr(EEPROM_device_model model)
 {
     switch(model) {
@@ -136,35 +104,41 @@ HAL_StatusTypeDef eeprom_writemem(EEPROM_device_t *dev, uint8_t* buff, size_t le
     if ((addr + first_page_remaining) >= eeprom_get_max_addr(dev->device_model)) return HAL_ERROR;
 
     status |= HAL_I2C_Mem_Write(dev->Intreface.i2c_handle,
-                                dev->Intreface.i2c_dev_addr << 1,
+                                EEPROM_BASE_ADDR_W | (dev->Intreface.i2c_dev_addr << 1),
                                 (uint16_t) addr,
                                 I2C_MEMADD_SIZE_16BIT,
                                 buff,
                                 first_page_remaining,
                                 1000);                                              // Записываем данные на 1-ю страницу
 
+    HAL_Delay(10);
+
 	for (uint8_t current_page = 0; current_page < num_of_pages; current_page++) {
         if ((addr + first_page_remaining + current_page * page_size) >= eeprom_get_max_addr(dev->device_model)) return HAL_ERROR;
 
         status |= HAL_I2C_Mem_Write(dev->Intreface.i2c_handle,
-                                    dev->Intreface.i2c_dev_addr << 1,
+                                    EEPROM_BASE_ADDR_W | (dev->Intreface.i2c_dev_addr << 1),
                                     (uint16_t) addr + first_page_remaining + current_page * page_size,
                                     I2C_MEMADD_SIZE_16BIT,
                                     buff + first_page_remaining + current_page * page_size,
                                     page_size,
                                     1000);                                        // Записываем данные на страницу с номером current_page
+
+        HAL_Delay(10);
 	}
 
 	if (last_page_remaining) {
         if ((addr + first_page_remaining + num_of_pages * page_size) >= eeprom_get_max_addr(dev->device_model)) return HAL_ERROR;
 
         status |= HAL_I2C_Mem_Write(dev->Intreface.i2c_handle,
-                                    dev->Intreface.i2c_dev_addr << 1,
+                                    EEPROM_BASE_ADDR_W | (dev->Intreface.i2c_dev_addr << 1),
                                     (uint16_t) addr + first_page_remaining + num_of_pages * page_size,
                                     I2C_MEMADD_SIZE_16BIT,
                                     buff + first_page_remaining + num_of_pages * page_size,
                                     last_page_remaining,
                                     1000);                                         // Если остаток есть, записываем его на последнюю страницу
+        
+        HAL_Delay(10);
 	}
 
 	return status;
@@ -177,12 +151,12 @@ HAL_StatusTypeDef eeprom_readmem(EEPROM_device_t *dev, uint8_t* buff, size_t len
     if (addr >= eeprom_get_max_addr(dev->device_model)) return HAL_ERROR;
     
     status = HAL_I2C_Mem_Read(dev->Intreface.i2c_handle, 
-                              dev->Intreface.i2c_dev_addr << 1, 
+                              EEPROM_BASE_ADDR_R | (dev->Intreface.i2c_dev_addr << 1), 
                               (uint16_t) addr, 
                               I2C_MEMADD_SIZE_16BIT, 
                               buff, 
                               len, 
                               1000);
-
+    
     return status;
 }
