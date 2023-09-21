@@ -1,8 +1,8 @@
 #include "flash_mem.h"
 
-HAL_StatusTypeDef flash_writemem(char* buff, size_t len, size_t addr)
+HAL_StatusTypeDef flash_writemem(char *buff, size_t len, size_t addr)
 {
-    //if (addr < FLASH_RESTRICTED_ADDR) return HAL_ERROR;
+    if (addr < FLASH_RESTRICTED_ADDR) return HAL_ERROR;
 
     HAL_StatusTypeDef hal_status;
 
@@ -38,9 +38,9 @@ HAL_StatusTypeDef flash_writemem(char* buff, size_t len, size_t addr)
     return HAL_OK;
 }
 
-HAL_StatusTypeDef flash_readmem(char* buff, size_t len, size_t addr) 
+HAL_StatusTypeDef flash_readmem(char *buff, size_t len, size_t addr) 
 {
-    // if (addr < FLASH_RESTRICTED_ADDR) return HAL_ERROR;
+    if (addr < FLASH_RESTRICTED_ADDR) return HAL_ERROR;
 
 	uint32_t *source_adr = (uint32_t*) addr;   // Определяем адрес, откуда будем читать
 	uint32_t data;

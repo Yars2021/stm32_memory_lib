@@ -1,7 +1,10 @@
 #ifndef _EEPROM_MEM_H_
 #define _EEPROM_MEM_H_
 
-#include "include.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "stm32f1xx_hal.h"
 
 #define EEPROM_BASE_ADDR_R		0xA1
 #define EEPROM_BASE_ADDR_W		0xA0
