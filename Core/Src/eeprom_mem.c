@@ -66,7 +66,7 @@ HAL_StatusTypeDef eeprom_device_init(EEPROM_device_t *dev, EEPROM_device_model m
     return HAL_OK;
 }
 
-HAL_StatusTypeDef eeprom_write_byte(EEPROM_device_t* dev, uint8_t* buff, size_t addr)
+HAL_StatusTypeDef eeprom_write_byte(EEPROM_device_t* dev, uint8_t *buff, size_t addr)
 {
 	if (addr >= eeprom_get_max_addr(dev->device_model)) return HAL_ERROR;
 
@@ -79,7 +79,7 @@ HAL_StatusTypeDef eeprom_write_byte(EEPROM_device_t* dev, uint8_t* buff, size_t 
 					         1000);
 }
 
-HAL_StatusTypeDef eeprom_read_byte(EEPROM_device_t* dev, uint8_t* buff, size_t addr)
+HAL_StatusTypeDef eeprom_read_byte(EEPROM_device_t* dev, uint8_t *buff, size_t addr)
 {
 	if (addr >= eeprom_get_max_addr(dev->device_model)) return HAL_ERROR;
 
@@ -92,7 +92,7 @@ HAL_StatusTypeDef eeprom_read_byte(EEPROM_device_t* dev, uint8_t* buff, size_t a
 					        1000);
 }
 
-HAL_StatusTypeDef eeprom_writemem(EEPROM_device_t *dev, uint8_t* buff, size_t len, size_t addr)
+HAL_StatusTypeDef eeprom_writemem(EEPROM_device_t *dev, uint8_t *buff, size_t len, size_t addr)
 {
     HAL_StatusTypeDef status = HAL_OK;
 
@@ -144,7 +144,7 @@ HAL_StatusTypeDef eeprom_writemem(EEPROM_device_t *dev, uint8_t* buff, size_t le
 	return status;
 }
 
-HAL_StatusTypeDef eeprom_readmem(EEPROM_device_t *dev, uint8_t* buff, size_t len, size_t addr)
+HAL_StatusTypeDef eeprom_readmem(EEPROM_device_t *dev, uint8_t *buff, size_t len, size_t addr)
 {
     HAL_StatusTypeDef status = HAL_OK;
 

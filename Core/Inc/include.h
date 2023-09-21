@@ -21,6 +21,7 @@
 #include "var.h"
 #include "memory.h"
 #include "eeprom_mem.h"
+#include "mem_cfg.h"
 
 #define VERSION_MAJOR			1
 #define VERSION_MINOR			0
