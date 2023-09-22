@@ -2,14 +2,16 @@
 
 static void init_rcc (void);
 static void init_gpio (void);
+static void i2c1_init(void);
 
-SPI_HandleTypeDef spi;
+I2C_HandleTypeDef hi2c1;
 
 void initLowLevel (void)
 {
     HAL_Init();
     init_rcc();
     init_gpio();
+    i2c1_init();
 }
 
 static void init_rcc (void)
@@ -61,44 +63,23 @@ static void init_gpio (void)
     HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
 }
 
-static void init_spi (void){
-    __HAL_RCC_SPI1_CLK_ENABLE();
-    spi.Instance = SPI2;
-    spi.Init.Mode = SPI_MODE_MASTER;
-    spi.Init.Direction = SPI_DIRECTION_2LINES;
-    spi.Init.DataSize = SPI_DATASIZE_8BIT;
-    spi.Init.CLKPolarity = SPI_POLARITY_LOW;
-    spi.Init.CLKPhase = SPI_PHASE_1EDGE;
-    spi.Init.NSS = SPI_NSS_SOFT;
-    spi.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
-    spi.Init.FirstBit = SPI_FIRSTBIT_MSB;
-    spi.Init.TIMode = SPI_TIMODE_DISABLE;
-    spi.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-    spi.Init.CRCPolynomial = 10;
-    if (HAL_SPI_Init(&spi) != HAL_OK)
+static void i2c1_init(void)
+{
+    __HAL_AFIO_REMAP_I2C1_ENABLE();
+    __HAL_RCC_I2C1_CLK_ENABLE();
+
+    hi2c1.Instance = I2C1;
+    hi2c1.Init.ClockSpeed = 100000;
+    hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
+    hi2c1.Init.OwnAddress1 = 0;
+    hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+    hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+    hi2c1.Init.OwnAddress2 = 0;
+    hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+    hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+    
+    if (HAL_I2C_Init(&hi2c1) != HAL_OK)
     {
-        Error_Handler();
+
     }
-
-    __HAL_RCC_GPIOB_CLK_ENABLE();
-    GPIO_InitTypeDef GPIO_InitStruct;
-
-    GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_15;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-    GPIO_InitStruct.Pin = GPIO_PIN_14;
-    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-    GPIO_InitStruct.Pin = GPIO_PIN_12;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12,GPIO_PIN_RESET);
-    HAL_Delay(10);
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
-    HAL_Delay(10);
 }

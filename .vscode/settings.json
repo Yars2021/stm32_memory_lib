@@ -2,6 +2,7 @@
     "cortex-debug.variableUseNaturalFormat": true,
     "files.associations": {
         "eeprom_mem.h": "c",
-        "stm32f1xx_hal.h": "c"
+        "stm32f1xx_hal.h": "c",
+        "w25x_mem.h": "c"
     }
 }
