@@ -16,15 +16,15 @@
 #endif 
 
 #ifdef EEPROM_DEV_1
-    EEPROM_device_t eeprom_dev_0;
+    EEPROM_device_t eeprom_dev_1;
 #endif 
 
 #ifdef EEPROM_DEV_2
-    EEPROM_device_t eeprom_dev_0;
+    EEPROM_device_t eeprom_dev_2;
 #endif 
 
 #ifdef EEPROM_DEV_3
-    EEPROM_device_t eeprom_dev_0;
+    EEPROM_device_t eeprom_dev_3;
 #endif 
 
 void init_eeprom(void)
