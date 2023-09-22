@@ -57,12 +57,12 @@ HAL_StatusTypeDef readmem(Device_type dev_t, void *device, size_t addr, char *bu
     switch (dev_t) {
         case Flash_Memory:
             #ifdef FLASH_MEM
-            return flash_readmem(buff, len, addr);
+                return flash_readmem(buff, len, addr);
             #endif
 
         case EEPROM_Memory:
             #ifdef EEPROM_MEM
-            return eeprom_readmem((EEPROM_device_t*)device, buff, len, addr);
+                return eeprom_readmem((EEPROM_device_t*)device, buff, len, addr);
             #endif
         
         default:
@@ -74,12 +74,12 @@ HAL_StatusTypeDef writemem(Device_type dev_t, void *device, size_t addr, char *b
     switch (dev_t) {
         case Flash_Memory:
             #ifdef FLASH_MEM
-            return flash_writemem(buff, len, addr);
+                return flash_writemem(buff, len, addr);
             #endif
 
         case EEPROM_Memory:
             #ifdef EEPROM_MEM
-            return eeprom_writemem((EEPROM_device_t*)device, buff, len, addr);
+                return eeprom_writemem((EEPROM_device_t*)device, buff, len, addr);
             #endif
 
         default:
