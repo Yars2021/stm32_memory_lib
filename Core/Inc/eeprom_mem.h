@@ -6,8 +6,10 @@
 
 #include "stm32f1xx_hal.h"
 
-#define EEPROM_BASE_ADDR_R		0xA1
-#define EEPROM_BASE_ADDR_W		0xA0
+#include "memory.h"
+
+#define EEPROM_BASE_ADDR_R	0xA1
+#define EEPROM_BASE_ADDR_W	0xA0
 
 #define AT24C01_MAX_ADDR    0x007F
 #define AT24C32_MAX_ADDR    0x0FFF
@@ -22,25 +24,6 @@
 #define AT24C128_PAGE_SIZE  64
 #define AT24C256_PAGE_SIZE  64
 #define AT24C512_PAGE_SIZE  128
-
-typedef enum {
-    AT24C01  = 1,
-    AT24C32  = 32, 
-    AT24C64  = 64, 
-    AT24C128 = 128, 
-    AT24C256 = 256, 
-    AT24C512 = 512 
-} EEPROM_device_model;
-
-typedef struct {
-    struct {
-        I2C_HandleTypeDef *i2c_handle;
-        uint16_t i2c_dev_addr;
-    } Interface;
-
-    EEPROM_device_model device_model;
-
-} EEPROM_device_t;
 
 size_t eeprom_get_max_addr(EEPROM_device_model model);
 size_t eeprom_get_page_size(EEPROM_device_model model);
