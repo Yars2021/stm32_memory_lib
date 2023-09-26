@@ -2,7 +2,7 @@
 
 #include "include.h"
 
-extern W25x_device_t *w25x_dev_0;
+extern N25Q_device_t *n25q_dev_0;
 
 HAL_StatusTypeDef w_stat, r_stat;
 
@@ -21,8 +21,8 @@ int main (void)
 
     while (1)
     {
-        writemem(W25x_Memory, w25x_dev_0, addr, write_long_mem, 255);
+        writemem(N25Q_Memory, n25q_dev_0, addr, write_long_mem, 255);
         HAL_Delay(100);
-        readmem(W25x_Memory, w25x_dev_0, addr, read_mem, 255);
+        readmem(N25Q_Memory, n25q_dev_0, addr, read_mem, 255);
     }
 }
