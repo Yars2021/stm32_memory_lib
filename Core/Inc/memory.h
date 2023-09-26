@@ -4,7 +4,7 @@
 typedef enum {
     Flash_Memory = 0,    // Flash mem
     EEPROM_Memory = 1,    // EEPROM
-    W25x_Memory = 2 //NOR Flash
+    N25Q_Memory = 2 //NOR Flash
 } Device_type;
 
 
@@ -29,18 +29,18 @@ typedef struct {
 
 typedef enum
 {
-	W25Q10,
-	W25Q20,
-	W25Q40,
-	W25Q80,
-	W25Q16,
-	W25Q32,
-	W25Q64,
-	W25Q128,
-	W25Q256,
-	W25Q512,
+	N25Q10,
+	N25Q20,
+	N25Q40,
+	N25Q80,
+	N25Q16,
+	N25Q32,
+	N25Q64,
+	N25Q128,
+	N25Q256,
+	N25Q512,
 	
-}W25QXX_device_model;
+}N25QXX_device_model;
 
 typedef struct {
     struct {
@@ -49,7 +49,7 @@ typedef struct {
         uint32_t gpio_pin;
     } Interface;
 
-    W25QXX_device_model device_model;
+    N25QXX_device_model device_model;
     uint8_t		UniqID[8];
 	uint16_t	PageSize;
 	uint32_t	PageCount;
@@ -63,7 +63,7 @@ typedef struct {
 	uint8_t		StatusRegister3;	
 	uint8_t		Lock;
 
-} W25x_device_t;
+} N25Q_device_t;
 
 void init_mem(void);
 HAL_StatusTypeDef readmem(Device_type dev_t, void *device, size_t addr, char *buff, size_t len);

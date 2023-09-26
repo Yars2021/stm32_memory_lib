@@ -70,7 +70,7 @@ set(GROUP_SOURCES_CORE
 		Core/Src/low_level.c
 		Core/Src/it.c
 		Core/Src/flash_mem.c
-		Core/Src/w25x_mem.c
+		Core/Src/n25q_mem.c
 		Core/Src/eeprom_mem.c
 		Core/Src/memory.c
 		)

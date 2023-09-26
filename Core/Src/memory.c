@@ -11,8 +11,8 @@
     extern I2C_HandleTypeDef hi2c2;
 #endif 
 
-#ifdef W25X_MEM
-    #include "w25x_mem.h"
+#ifdef N25Q_MEM
+    #include "n25q_mem.h"
 
     extern SPI_HandleTypeDef spi;
 #endif
@@ -33,20 +33,20 @@
     EEPROM_device_t eeprom_dev_3;
 #endif 
 
-#ifdef W25X_DEV_0
-    W25x_device_t w25x_dev_0;
+#ifdef N25Q_DEV_0
+    N25Q_device_t N25Q_dev_0;
 #endif 
 
-#ifdef W25X_DEV_1
-    W25x_device_t w25x_dev_1;
+#ifdef N25Q_DEV_1
+    N25Q_device_t N25Q_dev_1;
 #endif 
 
-#ifdef W25X_DEV_2
-    W25x_device_t w25x_dev_2;
+#ifdef N25Q_DEV_2
+    N25Q_device_t N25Q_dev_2;
 #endif 
 
-#ifdef W25X_DEV_3
-    W25x_device_t w25x_dev_3;
+#ifdef N25Q_DEV_3
+    N25Q_device_t N25Q_dev_3;
 #endif 
 
 void init_eeprom(void)
@@ -68,21 +68,21 @@ void init_eeprom(void)
     #endif 
 }
 
-void init_w25x(){
-    #ifdef W25X_DEV_0
-        w25x_device_init(&w25x_dev_0, W25X_DEV_0);
+void init_N25Q(){
+    #ifdef N25Q_DEV_0
+        N25Q_device_init(&N25Q_dev_0, N25Q_DEV_0);
     #endif 
 
-    #ifdef W25X_DEV_1
-        w25x_device_init(&w25x_dev_1, W25X_DEV_1);
+    #ifdef N25Q_DEV_1
+        N25Q_device_init(&N25Q_dev_1, N25Q_DEV_1);
     #endif 
 
-    #ifdef W25X_DEV_2
-        w25x_device_init(&w25xdev_2, W25X_DEV_2);
+    #ifdef N25Q_DEV_2
+        N25Q_device_init(&N25Qdev_2, N25Q_DEV_2);
     #endif 
 
-    #ifdef W25X_DEV_3
-        w25x_device_init(&w25x_dev_3, W25X_DEV_3);
+    #ifdef N25Q_DEV_3
+        N25Q_device_init(&N25Q_dev_3, N25Q_DEV_3);
     #endif 
 }
 
@@ -91,8 +91,8 @@ void init_mem(void)
     #ifdef EEPROM_MEM
         init_eeprom();
     #endif
-    #ifdef W25X_MEM
-        init_w25x();
+    #ifdef N25Q_MEM
+        init_N25Q();
     #endif
 }
 
@@ -109,9 +109,9 @@ HAL_StatusTypeDef readmem(Device_type dev_t, void *device, size_t addr, char *bu
                 return eeprom_readmem((EEPROM_device_t*)device, buff, len, addr);
             #endif
             break;
-        case W25x_Memory:
-            #ifdef W25X_MEM
-                return w25x_readmem(device, buff, len, addr);
+        case N25Q_Memory:
+            #ifdef N25Q_MEM
+                return N25Q_readmem(device, buff, len, addr);
             #endif
             break;
         
@@ -134,9 +134,9 @@ HAL_StatusTypeDef writemem(Device_type dev_t, void *device, size_t addr, char *b
                 return eeprom_writemem((EEPROM_device_t*)device, buff, len, addr);
             #endif
             break;
-        case W25x_Memory:
-            #ifdef W25X_MEM
-                return w25x_writemem(device, buff, len, addr);
+        case N25Q_Memory:
+            #ifdef N25Q_MEM
+                return N25Q_writemem(device, buff, len, addr);
             #endif
             break;
 
