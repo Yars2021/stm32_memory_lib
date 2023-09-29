@@ -34,19 +34,19 @@
 #endif 
 
 #ifdef N25Q_DEV_0
-    N25Q_device_t N25Q_dev_0;
+    N25Q_device_t n25q_dev_0;
 #endif 
 
 #ifdef N25Q_DEV_1
-    N25Q_device_t N25Q_dev_1;
+    N25Q_device_t n25q_dev_1;
 #endif 
 
 #ifdef N25Q_DEV_2
-    N25Q_device_t N25Q_dev_2;
+    N25Q_device_t n25q_dev_2;
 #endif 
 
 #ifdef N25Q_DEV_3
-    N25Q_device_t N25Q_dev_3;
+    N25Q_device_t n25q_dev_3;
 #endif 
 
 void init_eeprom(void)
@@ -70,19 +70,19 @@ void init_eeprom(void)
 
 void init_N25Q(){
     #ifdef N25Q_DEV_0
-        N25Q_device_init(&N25Q_dev_0, N25Q_DEV_0);
+        N25Q_device_init(&n25q_dev_0, N25Q_DEV_0);
     #endif 
 
     #ifdef N25Q_DEV_1
-        N25Q_device_init(&N25Q_dev_1, N25Q_DEV_1);
+        N25Q_device_init(&n25q_dev_1, N25Q_DEV_1);
     #endif 
 
     #ifdef N25Q_DEV_2
-        N25Q_device_init(&N25Qdev_2, N25Q_DEV_2);
+        N25Q_device_init(&n25qdev_2, N25Q_DEV_2);
     #endif 
 
     #ifdef N25Q_DEV_3
-        N25Q_device_init(&N25Q_dev_3, N25Q_DEV_3);
+        N25Q_device_init(&n25q_dev_3, N25Q_DEV_3);
     #endif 
 }
 
