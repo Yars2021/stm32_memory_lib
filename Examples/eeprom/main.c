@@ -2,7 +2,7 @@
 
 #include "include.h"
 
-extern N25Q_device_t *n25q_dev_0;
+extern EEPROM_device_t eeprom_dev_0;
 
 HAL_StatusTypeDef w_stat, r_stat;
 
@@ -21,8 +21,9 @@ int main (void)
 
     while (1)
     {
-        writemem(n25q_dev_0, addr, write_long_mem, 255);
+        w_stat = writemem(EEPROM_Memory, &eeprom_dev_0, addr, write_short_mem, 13);
+        HAL_Delay(250);
+        r_stat = readmem(EEPROM_Memory, &eeprom_dev_0, addr, read_mem, 13);
         HAL_Delay(100);
-        readmem(n25q_dev_0, addr, read_mem, 255);
     }
 }
