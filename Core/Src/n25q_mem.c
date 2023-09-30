@@ -69,6 +69,7 @@ void N25Qxx_WaitForWriteEnd(N25Q_device_t *dev)
 }
 
 HAL_StatusTypeDef N25Q_device_init(N25Q_device_t *dev, SPI_HandleTypeDef *spi_handle, GPIO_TypeDef *gpio_type, uint32_t gpio_pin){
+	dev->dev_t = N25Q_Memory;
     dev->Interface.gpio_pin = gpio_pin;
     dev->Interface.gpio_type = gpio_type;
     dev->Lock = 1;

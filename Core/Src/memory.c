@@ -2,6 +2,8 @@
 
 #ifdef FLASH_MEM
     #include "flash_mem.h"
+
+    Flash_device_t flash_dev;
 #endif
 
 #ifdef EEPROM_MEM
@@ -49,6 +51,10 @@
     N25Q_device_t n25q_dev_3;
 #endif 
 
+void init_flash(void){
+    flash_dev.dev_t = Flash_Memory;
+}
+
 void init_eeprom(void)
 {
     #ifdef EEPROM_DEV_0
@@ -88,6 +94,9 @@ void init_N25Q(){
 
 void init_mem(void)
 {
+    #ifdef FLASH_MEM
+        init_flash();
+    #endif
     #ifdef EEPROM_MEM
         init_eeprom();
     #endif
@@ -96,8 +105,8 @@ void init_mem(void)
     #endif
 }
 
-HAL_StatusTypeDef readmem(Device_type dev_t, void *device, size_t addr, char *buff, size_t len) {
-    switch (dev_t) {
+HAL_StatusTypeDef readmem(void *device, size_t addr, char *buff, size_t len) {
+    switch (((Flash_device_t*)device)->dev_t) {
         case Flash_Memory:
             #ifdef FLASH_MEM
                 return flash_readmem(buff, len, addr);
@@ -121,8 +130,8 @@ HAL_StatusTypeDef readmem(Device_type dev_t, void *device, size_t addr, char *bu
     return HAL_ERROR;
 }
 
-HAL_StatusTypeDef writemem(Device_type dev_t, void *device, size_t addr, char *buff, size_t len) {
-    switch (dev_t) {
+HAL_StatusTypeDef writemem(void *device, size_t addr, char *buff, size_t len) {
+    switch (((Flash_device_t*)device)->dev_t) {
         case Flash_Memory:
             #ifdef FLASH_MEM
                 return flash_writemem(buff, len, addr);

@@ -59,6 +59,8 @@ HAL_StatusTypeDef eeprom_device_init(EEPROM_device_t *dev, EEPROM_device_model m
 {
     if (!dev) return HAL_ERROR;
 
+    dev->dev_t = EEPROM_Memory;
+
     dev->Interface.i2c_handle = i2c_handle;
     dev->Interface.i2c_dev_addr = i2c_addr;
     dev->device_model = model;
