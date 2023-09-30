@@ -1,6 +1,8 @@
 #ifndef _MEMORY_H_
 #define _MEMORY_H_
 
+#include "mem_cfg.h"
+
 typedef enum {
     Flash_Memory = 0,    // Flash mem
     EEPROM_Memory = 1,    // EEPROM
@@ -34,6 +36,7 @@ typedef struct {
 
 } EEPROM_device_t;
 
+
 typedef enum
 {
 	N25Q10,
@@ -45,9 +48,8 @@ typedef enum
 	N25Q64,
 	N25Q128,
 	N25Q256,
-	N25Q512,
-	
-}N25QXX_device_model;
+	N25Q512
+} N25QXX_device_model;
 
 typedef struct {
     struct {
@@ -72,6 +74,7 @@ typedef struct {
 	uint8_t		Lock;
 
 } N25Q_device_t;
+
 
 void init_mem(void);
 HAL_StatusTypeDef readmem(void *device, size_t addr, char *buff, size_t len);

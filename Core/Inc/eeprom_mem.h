@@ -1,9 +1,6 @@
 #ifndef _EEPROM_MEM_H_
 #define _EEPROM_MEM_H_
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "stm32f1xx_hal.h"
 
 #include "memory.h"

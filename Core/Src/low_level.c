@@ -4,6 +4,7 @@ static void init_rcc (void);
 static void init_gpio (void);
 
 SPI_HandleTypeDef spi;
+I2C_HandleTypeDef hi2c1;
 
 void initLowLevel (void)
 {
@@ -61,7 +62,7 @@ static void init_gpio (void)
     HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
 }
 
-static void init_spi (void){
+static void init_spi (void) {
     __HAL_RCC_SPI1_CLK_ENABLE();
     spi.Instance = SPI2;
     spi.Init.Mode = SPI_MODE_MASTER;
@@ -97,7 +98,7 @@ static void init_spi (void){
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12,GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
     HAL_Delay(10);
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
     HAL_Delay(10);

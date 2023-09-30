@@ -51,7 +51,7 @@
     N25Q_device_t n25q_dev_3;
 #endif 
 
-void init_flash(void){
+void init_flash(void) {
     flash_dev.dev_t = Flash_Memory;
 }
 
@@ -74,7 +74,7 @@ void init_eeprom(void)
     #endif 
 }
 
-void init_N25Q(){
+void init_N25Q() {
     #ifdef N25Q_DEV_0
         N25Q_device_init(&n25q_dev_0, N25Q_DEV_0);
     #endif 
@@ -118,6 +118,7 @@ HAL_StatusTypeDef readmem(void *device, size_t addr, char *buff, size_t len) {
                 return eeprom_readmem((EEPROM_device_t*)device, buff, len, addr);
             #endif
             break;
+            
         case N25Q_Memory:
             #ifdef N25Q_MEM
                 return N25Q_readmem(device, buff, len, addr);
@@ -143,6 +144,7 @@ HAL_StatusTypeDef writemem(void *device, size_t addr, char *buff, size_t len) {
                 return eeprom_writemem((EEPROM_device_t*)device, buff, len, addr);
             #endif
             break;
+
         case N25Q_Memory:
             #ifdef N25Q_MEM
                 return N25Q_writemem(device, buff, len, addr);
