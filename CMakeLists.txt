@@ -54,6 +54,7 @@ include_directories(
 		Drivers/iUnilib/crc
 		Drivers/iUnilib/bootloader
 		Drivers/iUnilib/Devices
+		Drivers/Memory_Lib/Inc
 )
 
 # Тут прописываем дополнительные дефайны к проекту
@@ -69,10 +70,6 @@ set(GROUP_SOURCES_CORE
 		Core/Src/main.c
 		Core/Src/low_level.c
 		Core/Src/it.c
-		Core/Src/flash_mem.c
-		Core/Src/n25q_mem.c
-		Core/Src/eeprom_mem.c
-		Core/Src/memory.c
 		)
 
 set(GROUP_SOURCES_HAL_DRIVER
@@ -117,12 +114,20 @@ set(GROUP_SOURCES_UNILIB
 		Drivers/iUnilib/common/led.c
 		)
 
+set(GROUP_SOURCES_MEMORYLIB
+		Drivers/Memory_Lib/Src/eeprom_mem.c
+		Drivers/Memory_Lib/Src/flash_mem.c
+		Drivers/Memory_Lib/Src/memory.c
+		Drivers/Memory_Lib/Src/n25q_mem.c
+)
+
 set(SOURCES
 		${GROUP_SOURCES_CMSIS}
 		${GROUP_SOURCES_CORE}
 		${GROUP_SOURCES_HAL_DRIVER}
 		${GROUP_SOURCES_UNILIB_INTERFACE}
 		${GROUP_SOURCES_UNILIB}
+		${GROUP_SOURCES_MEMORYLIB}
 		)
 
 # Тут указывается файл скрипта линковщика
