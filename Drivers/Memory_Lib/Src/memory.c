@@ -9,14 +9,13 @@
 #ifdef EEPROM_MEM
     #include "eeprom_mem.h"
 
-    extern I2C_HandleTypeDef hi2c1;
-    extern I2C_HandleTypeDef hi2c2;
+    extern I2C_HandleTypeDef I2C_HANDLER_1;
 #endif 
 
 #ifdef N25Q_MEM
     #include "n25q_mem.h"
 
-    extern SPI_HandleTypeDef spi;
+    extern SPI_HandleTypeDef SPI_HANDLER_1;
 #endif
 
 #ifdef EEPROM_DEV_0

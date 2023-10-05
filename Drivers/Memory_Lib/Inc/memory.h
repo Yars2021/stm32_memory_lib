@@ -39,13 +39,6 @@ typedef struct {
 
 typedef enum
 {
-	N25Q10,
-	N25Q20,
-	N25Q40,
-	N25Q80,
-	N25Q16,
-	N25Q32,
-	N25Q64,
 	N25Q128,
 	N25Q256,
 	N25Q512
@@ -65,8 +58,8 @@ typedef struct {
 	uint32_t	PageCount;
 	uint32_t	SectorSize;
 	uint32_t	SectorCount;
-	uint32_t	BlockSize;
-	uint32_t	BlockCount;
+	uint32_t	SubSectorSize;
+	uint32_t	SubSectorCount;
 	uint32_t	CapacityInKiloByte;
 	uint8_t		StatusRegister1;
 	uint8_t		StatusRegister2;
