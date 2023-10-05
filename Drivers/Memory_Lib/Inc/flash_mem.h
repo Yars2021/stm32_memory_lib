@@ -5,7 +5,7 @@
 
 #include "memory.h"
 
-HAL_StatusTypeDef flash_writemem(char *buff, size_t len, size_t addr);
+HAL_StatusTypeDef flash_writemem(char *buff, int len, size_t addr);
 HAL_StatusTypeDef flash_readmem(char *buff, size_t len, size_t addr);
 
 #endif /* _FLASH_MEM_H_ */
