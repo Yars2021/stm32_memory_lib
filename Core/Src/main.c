@@ -34,8 +34,8 @@ int main (void)
         // HAL_Delay(100);
         // readmem(&eeprom_dev_0, addr, read_mem, 255);
 
-        writemem(&n25q_dev_0, addr, write_long_mem, 255);
+        writemem(&n25q_dev_0, addr, write_short_mem, 13);
         HAL_Delay(100);
-        readmem(&n25q_dev_0, addr, read_mem, 255);
+        readmem(&n25q_dev_0, addr, read_mem, 13);
     }
 }
