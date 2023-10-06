@@ -230,7 +230,7 @@ uint32_t N25Qxx_SubSectorToPage(uint32_t BlockAddress, N25Q_device_t *dev)
 	return (BlockAddress * dev->SubSectorSize) / dev->PageSize;
 }
 
-void N25Qxx_WritePage(uint8_t *buff, uint32_t addr, uint32_t len_up_to_PageSize, N25Q_device_t *dev)
+HAL_StatusTypeDef N25Qxx_WritePage(uint8_t *buff, uint32_t addr, uint32_t len_up_to_PageSize, N25Q_device_t *dev)
 {
 	while(dev->Lock == 1)
 		HAL_Delay(1);
@@ -256,7 +256,7 @@ void N25Qxx_WritePage(uint8_t *buff, uint32_t addr, uint32_t len_up_to_PageSize,
 	/*!< Send WriteAddr low nibble address byte to write to */
 	N25Qxx_Spi(addr & 0xFF, dev);
 
-	HAL_SPI_Transmit(dev->Interface.spi_handle, buff, len_up_to_PageSize, 100);
+	HAL_StatusTypeDef status = HAL_SPI_Transmit(dev->Interface.spi_handle, buff, len_up_to_PageSize, 100);
 
 	N25QFLASH_CS_UNSELECT(dev);
 
@@ -266,12 +266,15 @@ void N25Qxx_WritePage(uint8_t *buff, uint32_t addr, uint32_t len_up_to_PageSize,
 
 	HAL_Delay(1);
 	dev->Lock = 0;
+	return status;
 }
 
 HAL_StatusTypeDef N25Q_writemem(N25Q_device_t *dev, uint8_t *buff, int len, size_t waddr){
     if(len > dev->SectorCount * dev->SectorSize){
         return HAL_ERROR;
     }
+
+	HAL_StatusTypeDef status = HAL_OK;
 
 	uint8_t NumOfPage = 0, NumOfSingle = 0, Addr = 0, count = 0, temp = 0;
 
@@ -284,18 +287,18 @@ HAL_StatusTypeDef N25Q_writemem(N25Q_device_t *dev, uint8_t *buff, int len, size
   {
     if (NumOfPage == 0) /*!< len < sFLASH_PAGESIZE */
     {
-      N25Qxx_WritePage(buff, waddr, len, dev);
+      status |= N25Qxx_WritePage(buff, waddr, len, dev);
     }
     else /*!< len > sFLASH_PAGESIZE */
     {
       while (NumOfPage--)
       {
-        N25Qxx_WritePage(buff, waddr, dev->PageSize, dev);
+        status |=N25Qxx_WritePage(buff, waddr, dev->PageSize, dev);
         waddr +=  dev->PageSize;
         buff += dev->PageSize;
       }
 
-      N25Qxx_WritePage(buff, waddr, NumOfSingle, dev);
+      status |=N25Qxx_WritePage(buff, waddr, NumOfSingle, dev);
     }
   }
   else /*!< waddr is not sFLASH_PAGESIZE aligned  */
@@ -306,15 +309,15 @@ HAL_StatusTypeDef N25Q_writemem(N25Q_device_t *dev, uint8_t *buff, int len, size
       {
         temp = NumOfSingle - count;
 
-        N25Qxx_WritePage(buff, waddr, count, dev);
+        status |= N25Qxx_WritePage(buff, waddr, count, dev);
         waddr +=  count;
         buff += count;
 
-        N25Qxx_WritePage(buff, waddr, temp, dev);
+        status |= N25Qxx_WritePage(buff, waddr, temp, dev);
       }
       else
       {
-        N25Qxx_WritePage(buff, waddr, len, dev);
+        status |= N25Qxx_WritePage(buff, waddr, len, dev);
       }
     }
     else /*!< len > sFLASH_PAGESIZE */
@@ -323,24 +326,24 @@ HAL_StatusTypeDef N25Q_writemem(N25Q_device_t *dev, uint8_t *buff, int len, size
       NumOfPage =  len / dev->PageSize;
       NumOfSingle = len % dev->PageSize;
 
-      N25Qxx_WritePage(buff, waddr, count, dev);
+      status |= N25Qxx_WritePage(buff, waddr, count, dev);
       waddr +=  count;
       buff += count;
 
       while (NumOfPage--)
       {
-        N25Qxx_WritePage(buff, waddr, dev->PageSize, dev);
+        status |= N25Qxx_WritePage(buff, waddr, dev->PageSize, dev);
         waddr +=  dev->PageSize;
         buff += dev->PageSize;
       }
 
       if (NumOfSingle != 0)
       {
-        N25Qxx_WritePage(buff, waddr, NumOfSingle, dev);
+        status |= N25Qxx_WritePage(buff, waddr, NumOfSingle, dev);
       }
     }
   }
-    return HAL_OK;
+    return status;
 }
 
 HAL_StatusTypeDef N25Q_readmem(N25Q_device_t *dev, uint8_t *buff, size_t len, size_t addr){

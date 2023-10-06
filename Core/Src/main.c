@@ -24,6 +24,8 @@ int main (void)
 
     init_mem();
 
+    HAL_StatusTypeDef status;
+
     while (1)
     {
         // writemem(&flash_dev, 0x08011000, write_long_long_mem, 2048);
@@ -34,8 +36,8 @@ int main (void)
         // HAL_Delay(100);
         // readmem(&eeprom_dev_0, addr, read_mem, 255);
 
-        writemem(&n25q_dev_0, addr, write_short_mem, 13);
+        status = writemem(&n25q_dev_0, addr, write_short_mem, 13);
         HAL_Delay(100);
-        readmem(&n25q_dev_0, addr, read_mem, 13);
+        status = readmem(&n25q_dev_0, addr, read_mem, 13);
     }
 }
