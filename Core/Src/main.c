@@ -15,7 +15,7 @@ char write_long_mem[256] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
 char write_long_long_mem[2048] = {1};
 char read_mem[2048];
 
-size_t addr = 0xA;
+size_t addr = 0x1A;
 
 int main (void)
 {

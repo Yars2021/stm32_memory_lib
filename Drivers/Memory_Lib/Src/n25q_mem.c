@@ -87,6 +87,12 @@ HAL_StatusTypeDef N25Q_device_init(N25Q_device_t *dev, SPI_HandleTypeDef *spi_ha
 		case 0x20:	// 	N25Q512
 			dev->device_model = N25Q512;
 			dev->SectorCount = 1024;
+
+			N25Q_WriteEnable(dev);
+			N25QFLASH_CS_SELECT(dev);
+			N25Qxx_Spi(ENTER_4_BYTE_ADDR_MODE_CMD, dev);
+			N25QFLASH_CS_UNSELECT(dev);
+			N25Q_WriteDisable(dev);
 		break;
 
 		case 0x10:	// 	N25Q256
@@ -224,18 +230,12 @@ uint32_t N25Qxx_SubSectorToPage(uint32_t BlockAddress, N25Q_device_t *dev)
 	return (BlockAddress * dev->SubSectorSize) / dev->PageSize;
 }
 
-void N25Qxx_WritePage(uint8_t *pBuffer, uint32_t Page_Address, uint32_t OffsetInByte, uint32_t NumByteToWrite_up_to_PageSize, N25Q_device_t *dev)
+void N25Qxx_WritePage(uint8_t *buff, uint32_t addr, uint32_t len_up_to_PageSize, N25Q_device_t *dev)
 {
 	while(dev->Lock == 1)
 		HAL_Delay(1);
 
 	dev->Lock = 1;
-
-	if(((NumByteToWrite_up_to_PageSize + OffsetInByte) > dev->PageSize) || (NumByteToWrite_up_to_PageSize == 0))
-		NumByteToWrite_up_to_PageSize = dev->PageSize - OffsetInByte;
-
-	if((OffsetInByte + NumByteToWrite_up_to_PageSize) > dev->PageSize)
-		NumByteToWrite_up_to_PageSize = dev->PageSize - OffsetInByte;
 
 	N25Qxx_WaitForWriteEnd(dev);
 
@@ -245,16 +245,18 @@ void N25Qxx_WritePage(uint8_t *pBuffer, uint32_t Page_Address, uint32_t OffsetIn
 	int addrlen = 3;
 	if(dev->device_model >= N25Q512){
 		N25Qxx_Spi(PAGE_PROG_4_BYTE_ADDR_CMD, dev);
-		int addrlen = 4;
+		N25Qxx_Spi((addr & 0xFF000000) >> 24, dev);
 	}
 	else N25Qxx_Spi(PAGE_PROG_CMD, dev);
 
-	Page_Address = (Page_Address * dev->PageSize) + OffsetInByte;
+	/*!< Send WriteAddr high nibble address byte to write to */
+	N25Qxx_Spi((addr & 0xFF0000) >> 16, dev);
+	/*!< Send WriteAddr medium nibble address byte to write to */
+	N25Qxx_Spi((addr & 0xFF00) >> 8, dev);
+	/*!< Send WriteAddr low nibble address byte to write to */
+	N25Qxx_Spi(addr & 0xFF, dev);
 
-	uint8_t ret[4];
-	HAL_SPI_TransmitReceive(dev->Interface.spi_handle, &Page_Address, &ret, addrlen, 100);
-
-	HAL_SPI_Transmit(dev->Interface.spi_handle, pBuffer, NumByteToWrite_up_to_PageSize, 100);
+	HAL_SPI_Transmit(dev->Interface.spi_handle, buff, len_up_to_PageSize, 100);
 
 	N25QFLASH_CS_UNSELECT(dev);
 
@@ -266,18 +268,78 @@ void N25Qxx_WritePage(uint8_t *pBuffer, uint32_t Page_Address, uint32_t OffsetIn
 	dev->Lock = 0;
 }
 
-HAL_StatusTypeDef N25Q_writemem(N25Q_device_t *dev, uint8_t *buff, size_t len, size_t addr){
+HAL_StatusTypeDef N25Q_writemem(N25Q_device_t *dev, uint8_t *buff, int len, size_t waddr){
     if(len > dev->SectorCount * dev->SectorSize){
         return HAL_ERROR;
     }
 
-    while(len > 0){
-        N25Qxx_WritePage(buff, addr/dev->PageSize, addr%dev->PageSize, len, dev);
-        len-= dev->PageSize;
-        addr += dev->PageSize;
-        addr -= (addr%dev->PageSize);
-        buff += dev->PageSize;
+	uint8_t NumOfPage = 0, NumOfSingle = 0, Addr = 0, count = 0, temp = 0;
+
+  	Addr = waddr % dev->PageSize;
+  	count = dev->PageSize - Addr;
+  	NumOfPage =  len / dev->PageSize;
+  	NumOfSingle = len % dev->PageSize;
+
+    if (Addr == 0) /*!< waddr is sFLASH_PAGESIZE aligned  */
+  {
+    if (NumOfPage == 0) /*!< len < sFLASH_PAGESIZE */
+    {
+      N25Qxx_WritePage(buff, waddr, len, dev);
     }
+    else /*!< len > sFLASH_PAGESIZE */
+    {
+      while (NumOfPage--)
+      {
+        N25Qxx_WritePage(buff, waddr, dev->PageSize, dev);
+        waddr +=  dev->PageSize;
+        buff += dev->PageSize;
+      }
+
+      N25Qxx_WritePage(buff, waddr, NumOfSingle, dev);
+    }
+  }
+  else /*!< waddr is not sFLASH_PAGESIZE aligned  */
+  {
+    if (NumOfPage == 0) /*!< len < sFLASH_PAGESIZE */
+    {
+      if (NumOfSingle > count) /*!< (len + waddr) > sFLASH_PAGESIZE */
+      {
+        temp = NumOfSingle - count;
+
+        N25Qxx_WritePage(buff, waddr, count, dev);
+        waddr +=  count;
+        buff += count;
+
+        N25Qxx_WritePage(buff, waddr, temp, dev);
+      }
+      else
+      {
+        N25Qxx_WritePage(buff, waddr, len, dev);
+      }
+    }
+    else /*!< len > sFLASH_PAGESIZE */
+    {
+      len -= count;
+      NumOfPage =  len / dev->PageSize;
+      NumOfSingle = len % dev->PageSize;
+
+      N25Qxx_WritePage(buff, waddr, count, dev);
+      waddr +=  count;
+      buff += count;
+
+      while (NumOfPage--)
+      {
+        N25Qxx_WritePage(buff, waddr, dev->PageSize, dev);
+        waddr +=  dev->PageSize;
+        buff += dev->PageSize;
+      }
+
+      if (NumOfSingle != 0)
+      {
+        N25Qxx_WritePage(buff, waddr, NumOfSingle, dev);
+      }
+    }
+  }
     return HAL_OK;
 }
 
@@ -292,12 +354,15 @@ HAL_StatusTypeDef N25Q_readmem(N25Q_device_t *dev, uint8_t *buff, size_t len, si
 	int addrlen = 3;
 	if(dev->device_model >= N25Q512){
 		N25Qxx_Spi(READ_4_BYTE_ADDR_CMD, dev);
-		addrlen = 4;
+		N25Qxx_Spi((addr & 0xFF000000) >> 24, dev);
 	}
 	else N25Qxx_Spi(READ_CMD, dev);
-
-	uint8_t ret[4];
-	HAL_SPI_TransmitReceive(dev->Interface.spi_handle, &addr, &ret, addrlen, 100);
+	/*!< Send WriteAddr high nibble address byte to write to */
+	N25Qxx_Spi((addr & 0xFF0000) >> 16, dev);
+	/*!< Send WriteAddr medium nibble address byte to write to */
+	N25Qxx_Spi((addr & 0xFF00) >> 8, dev);
+	/*!< Send WriteAddr low nibble address byte to write to */
+	N25Qxx_Spi(addr & 0xFF, dev);
 
 	status |= HAL_SPI_Receive(dev->Interface.spi_handle, buff, len, len*100);
 
