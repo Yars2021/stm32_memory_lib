@@ -61,15 +61,16 @@ void N25Qxx_WaitForWriteEnd(N25Q_device_t *dev)
 		dev->StatusRegister1 = N25Qxx_Spi(0, dev);
 		HAL_Delay(1);
 	}
-	while((dev->StatusRegister1 & 0x01) == 0x01);
+	while((dev->StatusRegister1 & 0x01) == SET);
 
-	N25QFLASH_CS_UNSELECT(dev);(dev);
+	N25QFLASH_CS_UNSELECT(dev);
 }
 
 HAL_StatusTypeDef N25Q_device_init(N25Q_device_t *dev, SPI_HandleTypeDef *spi_handle, GPIO_TypeDef *gpio_type, uint32_t gpio_pin){
 	dev->dev_t = N25Q_Memory;
     dev->Interface.gpio_pin = gpio_pin;
     dev->Interface.gpio_type = gpio_type;
+	dev->Interface.spi_handle = spi_handle;
     dev->Lock = 1;
 	while(HAL_GetTick() < 100)
 	HAL_Delay(1);
@@ -102,20 +103,19 @@ HAL_StatusTypeDef N25Q_device_init(N25Q_device_t *dev, SPI_HandleTypeDef *spi_ha
 		default:
 
 			dev->Lock = 0;
-			return 0;
+			return HAL_ERROR;
 	}
 
 
 	dev->PageSize = 256;
-	dev->SectorSize = 0x1000;
+	dev->SubSectorSize = 0x1000;
 	dev->SubSectorCount = dev->SectorCount * 16;
 	dev->PageCount = (dev->SubSectorCount * dev->SubSectorSize) / dev->PageSize;
 	dev->SectorSize = dev->SubSectorSize * 16;
 	dev->CapacityInKiloByte = (dev->SubSectorCount * dev->SubSectorSize) / 1024;
 
 	dev->Lock = 0;
-	return 1;
-
+	return HAL_OK;
 }
 
 void N25Qxx_EraseChip(N25Q_device_t *dev)
@@ -237,24 +237,30 @@ void N25Qxx_WritePage(uint8_t *pBuffer, uint32_t Page_Address, uint32_t OffsetIn
 	if((OffsetInByte + NumByteToWrite_up_to_PageSize) > dev->PageSize)
 		NumByteToWrite_up_to_PageSize = dev->PageSize - OffsetInByte;
 
-
 	N25Qxx_WaitForWriteEnd(dev);
 
-	N25QFLASH_CS_SELECT(dev);
+	N25Q_WriteEnable(dev);
 
-	if(dev->device_model >= N25Q512)
+	N25QFLASH_CS_SELECT(dev);
+	int addrlen = 3;
+	if(dev->device_model >= N25Q512){
 		N25Qxx_Spi(PAGE_PROG_4_BYTE_ADDR_CMD, dev);
+		int addrlen = 4;
+	}
 	else N25Qxx_Spi(PAGE_PROG_CMD, dev);
 
 	Page_Address = (Page_Address * dev->PageSize) + OffsetInByte;
 
-	N25Qxx_Spi(Page_Address, dev);
+	uint8_t ret[4];
+	HAL_SPI_TransmitReceive(dev->Interface.spi_handle, &Page_Address, &ret, addrlen, 100);
 
 	HAL_SPI_Transmit(dev->Interface.spi_handle, pBuffer, NumByteToWrite_up_to_PageSize, 100);
 
 	N25QFLASH_CS_UNSELECT(dev);
 
 	N25Qxx_WaitForWriteEnd(dev);
+
+	N25Q_WriteDisable(dev);
 
 	HAL_Delay(1);
 	dev->Lock = 0;
@@ -264,7 +270,6 @@ HAL_StatusTypeDef N25Q_writemem(N25Q_device_t *dev, uint8_t *buff, size_t len, s
     if(len > dev->SectorCount * dev->SectorSize){
         return HAL_ERROR;
     }
-	N25Q_WriteEnable(dev);
 
     while(len > 0){
         N25Qxx_WritePage(buff, addr/dev->PageSize, addr%dev->PageSize, len, dev);
@@ -273,7 +278,6 @@ HAL_StatusTypeDef N25Q_writemem(N25Q_device_t *dev, uint8_t *buff, size_t len, s
         addr -= (addr%dev->PageSize);
         buff += dev->PageSize;
     }
-	N25Q_WriteDisable(dev);
     return HAL_OK;
 }
 
@@ -285,17 +289,30 @@ HAL_StatusTypeDef N25Q_readmem(N25Q_device_t *dev, uint8_t *buff, size_t len, si
 	dev->Lock = 1;
 
 	N25QFLASH_CS_SELECT(dev);
-	if(dev->device_model >= N25Q512)
+	int addrlen = 3;
+	if(dev->device_model >= N25Q512){
 		N25Qxx_Spi(READ_4_BYTE_ADDR_CMD, dev);
+		addrlen = 4;
+	}
 	else N25Qxx_Spi(READ_CMD, dev);
 
-	N25Qxx_Spi(addr, dev);
+	uint8_t ret[4];
+	HAL_SPI_TransmitReceive(dev->Interface.spi_handle, &addr, &ret, addrlen, 100);
 
-	status |= HAL_SPI_Receive(dev->Interface.spi_handle, buff, len, 2000);
+	status |= HAL_SPI_Receive(dev->Interface.spi_handle, buff, len, len*100);
 
 	N25QFLASH_CS_UNSELECT(dev);
 
 	HAL_Delay(1);
 	dev->Lock = 0;
     return status;
+}
+
+void N25Q_reset(N25Q_device_t *dev){
+	N25QFLASH_CS_SELECT(dev);
+	N25Qxx_Spi(RESET_ENABLE_CMD, dev);
+	N25QFLASH_CS_UNSELECT(dev);
+	N25QFLASH_CS_SELECT(dev);
+	N25Qxx_Spi(RESET_MEMORY_CMD, dev);
+	N25QFLASH_CS_UNSELECT(dev);
 }

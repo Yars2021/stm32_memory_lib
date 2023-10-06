@@ -2,6 +2,7 @@
 
 static void init_rcc (void);
 static void init_gpio (void);
+static void init_spi (void);
 
 SPI_HandleTypeDef spi;
 I2C_HandleTypeDef hi2c1;
@@ -11,6 +12,7 @@ void initLowLevel (void)
     HAL_Init();
     init_rcc();
     init_gpio();
+    init_spi();
 }
 
 static void init_rcc (void)
@@ -63,15 +65,15 @@ static void init_gpio (void)
 }
 
 static void init_spi (void) {
-    __HAL_RCC_SPI1_CLK_ENABLE();
+    __HAL_RCC_SPI2_CLK_ENABLE();
     spi.Instance = SPI2;
     spi.Init.Mode = SPI_MODE_MASTER;
     spi.Init.Direction = SPI_DIRECTION_2LINES;
     spi.Init.DataSize = SPI_DATASIZE_8BIT;
-    spi.Init.CLKPolarity = SPI_POLARITY_LOW;
-    spi.Init.CLKPhase = SPI_PHASE_1EDGE;
+    spi.Init.CLKPolarity = SPI_POLARITY_HIGH;
+    spi.Init.CLKPhase = SPI_PHASE_2EDGE;
     spi.Init.NSS = SPI_NSS_SOFT;
-    spi.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
+    spi.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
     spi.Init.FirstBit = SPI_FIRSTBIT_MSB;
     spi.Init.TIMode = SPI_TIMODE_DISABLE;
     spi.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;

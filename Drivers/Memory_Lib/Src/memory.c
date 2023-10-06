@@ -131,7 +131,8 @@ HAL_StatusTypeDef readmem(void *device, size_t addr, char *buff, size_t len) {
 }
 
 HAL_StatusTypeDef writemem(void *device, size_t addr, char *buff, size_t len) {
-    switch (((Flash_device_t*)device)->dev_t) {
+    Device_type dev = ((Flash_device_t*)device)->dev_t;
+    switch (dev) {
         case Flash_Memory:
             #ifdef FLASH_MEM
                 return flash_writemem(buff, len, addr);
@@ -146,7 +147,7 @@ HAL_StatusTypeDef writemem(void *device, size_t addr, char *buff, size_t len) {
 
         case N25Q_Memory:
             #ifdef N25Q_MEM
-                return N25Q_writemem(device, buff, len, addr);
+                return N25Q_writemem((N25Q_device_t *)device, buff, len, addr);
             #endif
             break;
 

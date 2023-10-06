@@ -26,12 +26,12 @@ typedef enum {
 } EEPROM_device_model;
 
 typedef struct {
+    Device_type dev_t;
     struct {
         I2C_HandleTypeDef *i2c_handle;
         uint16_t i2c_dev_addr;
     } Interface;
-
-    Device_type dev_t;
+    
     EEPROM_device_model device_model;
 
 } EEPROM_device_t;
@@ -45,13 +45,13 @@ typedef enum
 } N25QXX_device_model;
 
 typedef struct {
+    Device_type dev_t;
     struct {
         SPI_HandleTypeDef *spi_handle;
         GPIO_TypeDef *gpio_type;
         uint32_t gpio_pin;
     } Interface;
-
-    Device_type dev_t;
+    
     N25QXX_device_model device_model;
     uint8_t		UniqID[8];
 	uint16_t	PageSize;

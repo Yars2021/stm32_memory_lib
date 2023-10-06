@@ -1,10 +1,11 @@
 #define MAIN
 
 #include "include.h"
+#include "n25q_mem.h"
 
 extern Flash_device_t flash_dev;
-// extern EEPROM_device_t *eeprom_dev_0;
-// extern N25Q_device_t *n25q_dev_0;
+// extern EEPROM_device_t eeprom_dev_0;
+extern N25Q_device_t n25q_dev_0;
 
 HAL_StatusTypeDef w_stat, r_stat;
 
@@ -25,16 +26,16 @@ int main (void)
 
     while (1)
     {
-        writemem(&flash_dev, 0x08011000, write_long_long_mem, 2048);
+        // writemem(&flash_dev, 0x08011000, write_long_long_mem, 2048);
+        // HAL_Delay(100);
+        // readmem(&flash_dev, 0x08011000, read_mem, 2048);
+
+        // writemem(&eeprom_dev_0, addr, write_long_mem, 255);
+        // HAL_Delay(100);
+        // readmem(&eeprom_dev_0, addr, read_mem, 255);
+
+        writemem(&n25q_dev_0, addr, write_long_mem, 255);
         HAL_Delay(100);
-        readmem(&flash_dev, 0x08011000, read_mem, 2048);
-
-        // writemem(eeprom_dev_0, addr, write_long_mem, 255);
-        // HAL_Delay(100);
-        // readmem(eeprom_dev_0, addr, read_mem, 255);
-
-        // writemem(n25q_dev_0, addr, write_long_mem, 255);
-        // HAL_Delay(100);
-        // readmem(n25q_dev_0, addr, read_mem, 255);
+        readmem(&n25q_dev_0, addr, read_mem, 255);
     }
 }
