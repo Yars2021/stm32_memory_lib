@@ -186,8 +186,6 @@ void N25Qxx_EraseSubSector(uint32_t SubSectorAddr, N25Q_device_t *dev)
 	N25Q_WriteEnable(dev);
 
 	N25QFLASH_CS_SELECT(dev);
-
-	N25QFLASH_CS_SELECT(dev);
 	if(dev->device_model >= N25Q512) N25Qxx_Spi(SUBSECTOR_ERASE_4_BYTE_ADDR_CMD, dev);
 	else N25Qxx_Spi(SUBSECTOR_ERASE_CMD, dev);
 	
@@ -256,7 +254,9 @@ HAL_StatusTypeDef N25Qxx_WritePage(uint8_t *buff, uint32_t addr, uint32_t len_up
 	/*!< Send WriteAddr low nibble address byte to write to */
 	N25Qxx_Spi(addr & 0xFF, dev);
 
-	HAL_StatusTypeDef status = HAL_SPI_Transmit(dev->Interface.spi_handle, buff, len_up_to_PageSize, 100);
+	for(int i=0; i<len_up_to_PageSize; i++){
+		N25Qxx_Spi(buff[i], dev);
+	}
 
 	N25QFLASH_CS_UNSELECT(dev);
 
@@ -266,13 +266,14 @@ HAL_StatusTypeDef N25Qxx_WritePage(uint8_t *buff, uint32_t addr, uint32_t len_up
 
 	HAL_Delay(1);
 	dev->Lock = 0;
-	return status;
+	return HAL_OK;
 }
 
 HAL_StatusTypeDef N25Q_writemem(N25Q_device_t *dev, uint8_t *buff, int len, size_t waddr){
     if(len > dev->SectorCount * dev->SectorSize){
         return HAL_ERROR;
     }
+	HAL_Delay(100);
 
 	HAL_StatusTypeDef status = HAL_OK;
 
@@ -348,7 +349,7 @@ HAL_StatusTypeDef N25Q_writemem(N25Q_device_t *dev, uint8_t *buff, int len, size
 
 HAL_StatusTypeDef N25Q_readmem(N25Q_device_t *dev, uint8_t *buff, size_t len, size_t addr){
     while(dev->Lock == 1)
-	HAL_Delay(1);
+	HAL_Delay(100);
 
 	HAL_StatusTypeDef status = HAL_OK;
 	dev->Lock = 1;
@@ -367,7 +368,9 @@ HAL_StatusTypeDef N25Q_readmem(N25Q_device_t *dev, uint8_t *buff, size_t len, si
 	/*!< Send WriteAddr low nibble address byte to write to */
 	N25Qxx_Spi(addr & 0xFF, dev);
 
-	status |= HAL_SPI_Receive(dev->Interface.spi_handle, buff, len, len*100);
+	for(int i=0; i<len; i++){
+		buff[i] = N25Qxx_Spi(0, dev);
+	}
 
 	N25QFLASH_CS_UNSELECT(dev);
 

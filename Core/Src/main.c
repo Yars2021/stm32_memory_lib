@@ -28,16 +28,16 @@ int main (void)
 
     while (1)
     {
-        // writemem(&flash_dev, 0x08011000, write_long_long_mem, 2048);
-        // HAL_Delay(100);
-        // readmem(&flash_dev, 0x08011000, read_mem, 2048);
+        status = writemem(&flash_dev, 0x08011000, write_long_long_mem, 2048);
+        HAL_Delay(100);
+        status = readmem(&flash_dev, 0x08011000, read_mem, 2048);
 
         // writemem(&eeprom_dev_0, addr, write_long_mem, 255);
         // HAL_Delay(100);
         // readmem(&eeprom_dev_0, addr, read_mem, 255);
 
-        status = writemem(&n25q_dev_0, addr, write_short_mem, 13);
+        status = writemem(&n25q_dev_0, addr, write_long_long_mem, 255);
         HAL_Delay(100);
-        status = readmem(&n25q_dev_0, addr, read_mem, 13);
+        status = readmem(&n25q_dev_0, addr, read_mem, 255);
     }
 }
