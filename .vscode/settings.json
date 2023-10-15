@@ -3,6 +3,8 @@
     "files.associations": {
         "eeprom_mem.h": "c",
         "stm32f1xx_hal.h": "c",
-        "w25x_mem.h": "c"
+        "w25x_mem.h": "c",
+        "memory.h": "c",
+        "mem_cfg.h": "c"
     }
 }

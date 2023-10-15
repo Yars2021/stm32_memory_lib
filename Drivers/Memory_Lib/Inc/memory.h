@@ -4,9 +4,9 @@
 #include "mem_cfg.h"
 
 typedef enum {
-    Flash_Memory = 0,    // Flash mem
-    EEPROM_Memory = 1,    // EEPROM
-    N25Q_Memory = 2 //NOR Flash
+    Flash_Memory    = 0,    // Flash mem
+    EEPROM_Memory   = 1,    // EEPROM
+    N25Q_Memory     = 2     //NOR Flash
 } Device_type;
 
 typedef struct {
@@ -68,6 +68,41 @@ typedef struct {
 
 } N25Q_device_t;
 
+#ifdef FLASH_MEM
+    extern Flash_device_t flash_dev;
+#endif
+
+#ifdef EEPROM_DEV_0
+    extern EEPROM_device_t eeprom_dev_0;
+#endif 
+
+#ifdef EEPROM_DEV_1
+    extern EEPROM_device_t eeprom_dev_1;
+#endif 
+
+#ifdef EEPROM_DEV_2
+    extern EEPROM_device_t eeprom_dev_2;
+#endif 
+
+#ifdef EEPROM_DEV_3
+    extern EEPROM_device_t eeprom_dev_3;
+#endif 
+
+#ifdef N25Q_DEV_0
+    extern N25Q_device_t n25q_dev_0;
+#endif 
+
+#ifdef N25Q_DEV_1
+    extern N25Q_device_t n25q_dev_1;
+#endif 
+
+#ifdef N25Q_DEV_2
+    extern N25Q_device_t n25q_dev_2;
+#endif 
+
+#ifdef N25Q_DEV_3
+    extern N25Q_device_t n25q_dev_3;
+#endif 
 
 void init_mem(void);
 HAL_StatusTypeDef readmem(void *device, size_t addr, char *buff, size_t len);
